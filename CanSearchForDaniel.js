@@ -3,24 +3,65 @@ var casper = require("casper").create({
 });
 
 var count = 0;
+var countInPage = 0;
+var totalCount = 0;
+var foundUrls = [];
 
 var openUrl = function() {
 	this.thenOpen( "https://www.hellowork.go.jp/servicef/" + this.getElementsAttribute('table.sole-small #ID_link', 'href')[count], function() {
-		this.echo( this.getTitle());
-		this.capture('submit' + count + '.png');
+		var name = this.getHTML( 'div.wordBreak');
+		this.echo( name);
+		if ( 0 < name.indexOf('ダニエル')) {
+			this.echo(' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Contains Daniel !!!');
+			foundUrls.push( { No : totalCount + count + 1, Url : encodeURI( this.getCurrentUrl()) });
+		}
 		this.back();
 		count++;
 	});
 };
 
+// 頁内の求人リンクへ遷移し続ける. なければ次頁へ.
 var repeatOpenUrl = function() {
-	if ( count < 10) {
+	this.echo( 'start repeatOpenUrl : ' + ( totalCount + count));
+	if ( count < countInPage) {
 		openUrl.call( this);
 		casper.run( repeatOpenUrl);
 	} else {
+		this.echo( 'repeat done');
+		casper.run( moveToNext);
+	}
+	this.echo( 'end repeatOpenUrl : ' + ( totalCount + count));
+};
+
+// 頁内の初期設定をして、求人リンクへ遷移する
+var InitializeInPageAndOpenUrl = function() {
+	this.echo( 'start InitializeInPageAndOpenUrl : ' + count);
+	count = 0;
+	countInPage = this.getElementsAttribute('table.sole-small #ID_link', 'href').length;
+	repeatOpenUrl.call( this);
+	this.echo( 'end InitializeInPageAndOpenUrl : ' + count + ' / ' + countInPage);
+};
+
+// 次頁へ遷移する. なければ終了する.
+var moveToNext = function() {
+	this.echo( 'start moveToNext : ' + count);
+
+	var fu = this.evaluate( function() {
+		return document.querySelector('div.number-link-top p').innerText;
+	});
+	if ( this.exists('input[name=fwListNaviBtnNext]')) {
+		this.click('input[name=fwListNaviBtnNext]');
+		this.echo('next>> ' + fu);
+		totalCount += countInPage;
+
+		casper.run( InitializeInPageAndOpenUrl);
+	} else {
+		require('utils').dump( foundUrls);
 		this.echo( 'All done');
 		this.exit();
 	}
+
+	this.echo( 'end moveToNext : ' + count);
 };
 
 casper.start( "https://www.hellowork.go.jp/", function() {
@@ -38,6 +79,7 @@ casper.then(function(){
 	this.evaluate( function(){
 		document.querySelector('#ID_commonSearch').click();
 	});
+	this.echo('search form submit');
 });
 
 casper.waitFor( function check() {
@@ -45,7 +87,8 @@ casper.waitFor( function check() {
 		return 'ハローワークインターネットサービス - 求人情報一覧' == document.title;
 	});
 }, function then(){
-	this.capture('submit.png');
+	this.echo('submit done');
+	//this.capture('submit.png');
 });
 
-casper.run(repeatOpenUrl);
+casper.run(InitializeInPageAndOpenUrl);
