@@ -1,7 +1,8 @@
-var casper = require("casper").create({
-    verbose: true
-});
+//var casper = require("casper").create({
+//    verbose: true
+//});
 
+casper.test.begin('asd', 5, function suite(test) {
 var count = 0;
 var countInPage = 0;
 var totalCount = 0;
@@ -38,6 +39,7 @@ var InitializeInPageAndOpenUrl = function() {
 	this.echo( 'start InitializeInPageAndOpenUrl : ' + count);
 	count = 0;
 	countInPage = this.getElementsAttribute('table.sole-small #ID_link', 'href').length;
+	//countInPage = 15;
 	repeatOpenUrl.call( this);
 	this.echo( 'end InitializeInPageAndOpenUrl : ' + count + ' / ' + countInPage);
 };
@@ -50,6 +52,7 @@ var moveToNext = function() {
 		return document.querySelector('div.number-link-top p').innerText;
 	});
 	if ( this.exists('input[name=fwListNaviBtnNext]')) {
+	//if ( false) {
 		this.click('input[name=fwListNaviBtnNext]');
 		this.echo('next>> ' + fu);
 		totalCount += countInPage;
@@ -58,7 +61,11 @@ var moveToNext = function() {
 	} else {
 		require('utils').dump( foundUrls);
 		this.echo( 'All done');
-		this.exit();
+		test.assert(0 < foundUrls.length, 'ダニエルが存在しない！');
+		test.pass("hogehoge");
+		test.renderResults(true, 0, 'test-results.xml');
+		test.done();
+		//this.exit();
 	}
 
 	this.echo( 'end moveToNext : ' + count);
@@ -92,3 +99,4 @@ casper.waitFor( function check() {
 });
 
 casper.run(InitializeInPageAndOpenUrl);
+});
