@@ -10,11 +10,15 @@ var foundUrls = [];
 
 var openUrl = function() {
 	this.thenOpen( "https://www.hellowork.go.jp/servicef/" + this.getElementsAttribute('table.sole-small #ID_link', 'href')[count], function() {
-		var name = this.getHTML( 'div.wordBreak');
-		this.echo( name);
-		if ( 0 < name.indexOf('ダニエル')) {
-			this.echo(' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Contains Daniel !!!');
-			foundUrls.push( { No : totalCount + count + 1, Url : encodeURI( this.getCurrentUrl()) });
+		if ( this.exists( 'div.wordBreak')) {
+			var name = this.getHTML( 'div.wordBreak');
+			this.echo( name);
+			if ( 0 < name.indexOf('ダニエル')) {
+				this.echo(' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Contains Daniel !!!');
+				foundUrls.push( { No : totalCount + count + 1, Url : encodeURI( this.getCurrentUrl()) });
+			}
+		} else {
+			this.echo( 'unexists div.wordBreak');
 		}
 		this.back();
 		count++;
@@ -72,7 +76,7 @@ var moveToNext = function() {
 };
 
 casper.start( "https://www.hellowork.go.jp/", function() {
-	this.evaluate( function(){
+	this.evaluate( function(){	
 		document.querySelector('form').submit();
 	});
 });
