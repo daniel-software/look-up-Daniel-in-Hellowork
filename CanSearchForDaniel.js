@@ -2,7 +2,7 @@
 //    verbose: true
 //});
 
-casper.test.begin('asd', 5, function suite(test) {
+casper.test.begin('look up Daniel!', 4, function suite(test) {
 var count = 0;
 var countInPage = 0;
 var totalCount = 0;
@@ -65,10 +65,9 @@ var moveToNext = function() {
 	} else {
 		require('utils').dump( foundUrls);
 		this.echo( 'All done');
-		test.assert(0 < foundUrls.length, 'ダニエルが存在しない！');
-		test.pass("hogehoge");
-		test.renderResults(true, 0, 'test-results.xml');
+		test.assert(0 < foundUrls.length, '4. ダニエルが存在する！？');
 		test.done();
+		//test.renderResults(true, 0, 'test-results.xml');
 		//this.exit();
 	}
 
@@ -76,17 +75,20 @@ var moveToNext = function() {
 };
 
 casper.start( "https://www.hellowork.go.jp/", function() {
+	test.assertExists('form', '1. 求人情報検索へ');
 	this.evaluate( function(){	
 		document.querySelector('form').submit();
 	});
 });
 
 casper.then(function(){
+	test.assertExists('#ID_multiForm1', '2. 求人情報検索フォームがある');
 	this.fill('#ID_multiForm1', {
-		kiboShokushu : "B",
-		todofuken1 : "10",
-		kiboSangyo : "G"
+		kiboShokushu : "B", /* 希望する職種 : 専門的・技術的職業 */
+		todofuken1 : "10", /* 都道府県／市区町村名 : 群馬県 */
+		kiboSangyo : "G" /* 希望する産業 : 情報通信業 */
 	}, false);
+	test.assertExists('#ID_commonSearch', '3. 検索ボタンがある');
 	this.evaluate( function(){
 		document.querySelector('#ID_commonSearch').click();
 	});
