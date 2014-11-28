@@ -7,15 +7,20 @@ var count = 0;
 var countInPage = 0;
 var totalCount = 0;
 var foundUrls = [];
+var nameArea = '';
 
 var openUrl = function() {
 	this.thenOpen( "https://www.hellowork.go.jp/servicef/" + this.getElementsAttribute('table.sole-small #ID_link', 'href')[count], function() {
+		var startOfOne = totalCount + count + 1;
+		var encodedUrl = encodeURI( this.getCurrentUrl());
 		if ( this.exists( 'div.wordBreak')) {
 			var name = this.getHTML( 'div.wordBreak');
+			nameArea = nameArea + '<a href="' + encodedUrl + '">' + startOfOne + ':' + name + '</a><br/>\r\n';
 			this.echo( name);
 			if ( 0 < name.indexOf('ダニエル')) {
 				this.echo(' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Contains Daniel !!!');
-				foundUrls.push( { No : totalCount + count + 1, Url : encodeURI( this.getCurrentUrl()) });
+				foundUrls.push( { No : startOfOne, Url : encodedUrl });
+				this.capture( startOfOne + '.Daniel.png');
 			}
 		} else {
 			this.echo( 'unexists div.wordBreak');
@@ -67,6 +72,7 @@ var moveToNext = function() {
 		this.echo( 'All done');
 		test.assert(0 < foundUrls.length, '4. ダニエルが存在する！？');
 		test.done();
+		require('fs').write('list.html', nameArea, 'w');
 		//test.renderResults(true, 0, 'test-results.xml');
 		//this.exit();
 	}
