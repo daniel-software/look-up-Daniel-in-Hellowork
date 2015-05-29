@@ -70,9 +70,9 @@ var moveToNext = function() {
 	} else {
 		require('utils').dump( foundUrls);
 		this.echo( 'All done');
+		require('fs').write('list.html', nameArea, 'w');
 		test.assert(0 < foundUrls.length, '4. ダニエルが存在する！？');
 		test.done();
-		require('fs').write('list.html', nameArea, 'w');
 		//test.renderResults(true, 0, 'test-results.xml');
 		//this.exit();
 	}
