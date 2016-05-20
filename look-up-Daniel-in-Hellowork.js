@@ -2,7 +2,7 @@
 //    verbose: true
 //});
 
-casper.test.begin('look up Daniel!', 4, function suite(test) {
+casper.test.begin('look up Daniel!', 6, function suite(test) {
 var count = 0;
 var countInPage = 0;
 var totalCount = 0;
@@ -90,9 +90,7 @@ casper.start( "https://www.hellowork.go.jp/", function() {
 casper.then(function(){
 	test.assertExists('#ID_multiForm1', '2. 求人情報検索フォームがある');
 	this.fill('#ID_multiForm1', {
-		kiboShokushu : "B", /* 希望する職種 : 専門的・技術的職業 */
-		todofuken1 : "10", /* 都道府県／市区町村名 : 群馬県 */
-		kiboSangyo : "G" /* 希望する産業 : 情報通信業 */
+		todofuken : "10" /* 都道府県／市区町村名 : 群馬県 */
 	}, false);
 	test.assertExists('#ID_commonSearch', '3. 検索ボタンがある');
 	this.evaluate( function(){
@@ -101,13 +99,26 @@ casper.then(function(){
 	this.echo('search form submit');
 });
 
-casper.waitFor( function check() {
-	return this.evaluate( function(){
-		return 'ハローワークインターネットサービス - 求人情報一覧' == document.title;
+casper.then(function(){
+	this.waitForSelector('#ID_mainForm', function() {
+		test.assertExists('#ID_mainForm', '4. 求人情報詳細検索フォームがある');
+		this.fill('#ID_mainForm', {
+			kiboShokushu1 : "B", /* 希望する職種 : 専門的・技術的職業 */
+			kiboSangyo1 : "G" /* 希望する産業 : 情報通信業 */
+		}, false);
+		test.assertExists('#ID_commonSearch', '5. 検索ボタンがある');
+		this.evaluate( function(){
+			document.querySelector('#ID_commonSearch').click();
+		});
+		this.echo('search form detail submit');
 	});
-}, function then(){
-	this.echo('submit done');
-	//this.capture('submit.png');
+});
+
+casper.then(function(){
+	// Submit後の同期とれなくて、↓という文言で無理やり同期してる
+	this.waitForText('専門的・技術的職業', function() {
+		this.echo('submit done');
+	});
 });
 
 casper.run(InitializeInPageAndOpenUrl);
